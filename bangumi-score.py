@@ -15,7 +15,6 @@ API_LONG_REVIEWS = "https://api.bilibili.com/pgc/review/long/list"
 RichTracebackInstall()
 
 
-@staticmethod
 def fetchReviews(log: logging.Logger, api_path: str, bangumi_id: int, user_agent: str, interval: float, reviews_number: int) -> List[int]:
     reviews_score_list: List[int] = []
     review_cursor: int = -1
@@ -46,6 +45,7 @@ def fetchReviews(log: logging.Logger, api_path: str, bangumi_id: int, user_agent
 
                 for review in parsed_content["data"]["list"]:
                     cache.append(review["score"])
+                    log.debug(f"Review {review['review_id']}: {str(review['score']).zfill(2)} @{review['author']['uname']}")
 
                 review_cursor = parsed_content["data"]["next"]
                 reviews_score_list.extend(cache)
@@ -99,7 +99,7 @@ def _main(args: argparse.Namespace, log: logging.Logger) -> None:
     log.info(
         "[bold]Short reviews fetch [green]completed[/green].[/]\n"
         "Average score: "
-        "{:.2f} (based on {} reviews)\n".format(
+        "{:.2f} (based on {} reviews)".format(
             short_reviews_average_score, len(short_reviews_score_list)),
         extra={"markup": True}
     )
@@ -113,7 +113,7 @@ def _main(args: argparse.Namespace, log: logging.Logger) -> None:
     log.info(
         "[bold]Long reviews fetch [green]completed[/green].[/]\n"
         "Average score: "
-        "{:.2f} (based on {} reviews)\n".format(
+        "{:.2f} (based on {} reviews)".format(
             long_reviews_average_score, len(long_reviews_score_list)),
         extra={"markup": True}
     )
@@ -163,13 +163,23 @@ if __name__ == '__main__':
         default=.5,
         help="Interval between two requests"
     )
+    parser.add_argument(
+        '--no-log-file',
+        action="store_true",
+        help="No bangumi-score.log file"
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
-        level=logging._nameToLevel[args.level.upper()],
+        level=logging._nameToLevel[args.level],
         format="%(message)s",
         datefmt="[%X]",
-        handlers=[RichHandler()]
+        handlers=[
+            RichHandler(),
+            logging.NullHandler() 
+            if args.no_log_file 
+            else logging.FileHandler("bangumi-score.log", mode='w', encoding='utf-8')
+        ]
     )
     log = logging.getLogger()
 
