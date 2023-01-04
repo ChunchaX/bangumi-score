@@ -37,7 +37,7 @@ options:
     ```
 2. 设置并激活虚拟环境
     ```
-    $  python -m venv . && ./Scripts/activate
+    $  python -m venv . && source bin/activate
     ```
 3. 安装依赖
     ```
