@@ -176,9 +176,9 @@ if __name__ == '__main__':
         datefmt="[%X]",
         handlers=[
             RichHandler(),
-            logging.NullHandler() 
-            if args.no_log_file 
-            else logging.FileHandler("bangumi-score.log", mode='w', encoding='utf-8')
+            logging.FileHandler("bangumi-score.log", mode='w', encoding='utf-8')
+            if not args.no_log_file 
+            else logging.NullHandler()
         ]
     )
     log = logging.getLogger()
